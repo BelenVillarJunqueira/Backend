@@ -1,0 +1,74 @@
+[[
+    {
+    "id": "Azaleadoble",
+    "title": "Azalea Doble",
+    "description": "Azalea doble, floración 1 vez al año. 12lts.",
+    "code": "RM001",
+    "price": 12000,
+    "status": true,
+    "stock": 25,
+    "category": "Plantas",
+    "thumbnails": ["Multimedia/azaleadoble2.jpeg"]
+}, 
+
+
+    {
+    "id": "Calistemo",
+    "title": "Calistemo",
+    "description": "Calistemo de 5lts, florece en verano.",
+    "code": "RM002",
+    "price": 18500,
+    "status": true,
+    "stock": 30,
+    "category": "Arboles",
+    "thumbnails": ["Multimedia/calistemo.jpeg"]
+},
+
+    {
+    "id": "Arce",
+    "title": "Arce",
+    "description": "Arce 4 estaciones, cambia de color. 5lts.",
+    "code": "RM003",
+    "price": 18000,
+    "status": true,
+    "stock": 38,
+    "category": "Arboles",
+    "thumbnails": ["Multimedia/arce.jpeg"]
+},
+
+    {
+    "id": "Jazminkimura",
+    "title": "Jazmín Kimura",
+    "description": "Jazmín kimura floración 1 vez al año, aroma fuerte y agradable.",
+    "code": "RM004",
+    "price": 13500,
+    "status": true,
+    "stock": 30,
+    "category": "Plantas",
+    "thumbnails": ["Multimedia/jazmin kimura."]
+},
+
+    {
+    "id": "Macetasplasticas",
+    "title": "Macetas plasticas",
+    "description": "Macetas plasticas, varios colores a elección.",
+    "code": "RM005",
+    "price": 6500,
+    "status": true,
+    "stock": 20,
+    "category": "Macetas",
+    "thumbnails": ["Multimedia/macetas plasticas.jpeg"]
+},
+
+    {
+    "id": "Triodemacetas",
+    "title": "Trío de macetas",
+    "description": "Trío de macetas de porcelana.",
+    "code": "RM006",
+    "price": 10500,
+    "status": true,
+    "stock": 35,
+    "category": "Macetas",
+    "thumbnails": ["Multimedia/trio macetas.jpeg"]
+}
+]]
