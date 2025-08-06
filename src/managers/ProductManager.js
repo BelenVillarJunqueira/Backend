@@ -7,8 +7,14 @@ constructor(path) {
 }
 
 async getProducts() {
+    try {
     const data = await fs.readFile(this.path, 'utf-8');
-    return JSON.parse(data);
+    const products = JSON.parse(data);
+    return Array.isArray(products) ? products : [];
+    } catch (error) {
+    await fs.writeFile(this.path, JSON.stringify([], null, 2));
+    return [];
+    }
 }
 
 async getProductById(id) {

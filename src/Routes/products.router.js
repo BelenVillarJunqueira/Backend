@@ -1,30 +1,33 @@
 const express = require('express');
 const router = express.Router();
+const path = require('path');
+const ProductManager = require('../managers/ProductManager')
 
+const manager = new ProductManager(path.join(__dirname, '../Data/products.json'));
 
-let products = [
-{ id: 1, name: 'Producto A', price: 100 },
-{ id: 2, name: 'Producto B', price: 200 }
-];
-
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
+const products = await manager.getProducts();
 res.json(products);
 });
 
-
-router.get('/:pid', (req, res) => {
-const product = products.find(p => p.id === parseInt(req.params.pid));
+router.get('/:pid', async (req, res) => {
+const product = await manager.getProductById(req.params.pid);
 product ? res.json(product) : res.status(404).send('Producto no encontrado');
 });
 
-
-router.post('/', (req, res) => {
-const newProduct = {
-    id: products.length + 1,
-    ...req.body
-};
-products.push(newProduct);
+router.post('/', async (req, res) => {
+const newProduct = await manager.addProduct(req.body);
 res.status(201).json(newProduct);
+});
+
+router.put('/:pid', async (req, res) => {
+const updated = await manager.updateProduct(req.params.pid, req.body);
+updated ? res.json(updated) : res.status(404).send('Producto no encontrado');
+});
+
+router.delete('/:pid', async (req, res) => {
+const success = await manager.deleteProduct(req.params.pid);
+success ? res.sendStatus(204) : res.status(404).send('Producto no encontrado');
 });
 
 module.exports = router;

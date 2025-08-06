@@ -7,8 +7,14 @@ constructor(path) {
 }
 
 async getCarts() {
+    try {
     const data = await fs.readFile(this.path, 'utf-8');
-    return JSON.parse(data);
+    const carts = JSON.parse(data);
+    return Array.isArray(carts) ? carts : [];
+    } catch (error) {
+    await fs.writeFile(this.path, JSON.stringify([], null, 2));
+    return [];
+    }
 }
 
 async createCart() {

@@ -1,46 +1,29 @@
 const express = require('express');
 const router = express.Router();
+const path = require('path');
+const CartManager = require('../managers/CartManager');
 
+const manager = new CartManager(path.join(__dirname, '../Data/cart.json'));
 
-let carts = [
-{ id: 1, products: [] }
-];
-
-
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
+const carts = await manager.getCarts();
 res.json(carts);
 });
 
-
-router.get('/:cid', (req, res) => {
-const cart = carts.find(c => c.id === parseInt(req.params.cid));
+router.get('/:cid', async (req, res) => {
+const cart = await manager.getCartById(req.params.cid);
 cart ? res.json(cart) : res.status(404).send('Carrito no encontrado');
 });
 
-
-router.post('/', (req, res) => {
-const newCart = {
-    id: carts.length + 1,
-    products: []
-};
-carts.push(newCart);
+router.post('/', async (req, res) => {
+const newCart = await manager.createCart();
 res.status(201).json(newCart);
 });
 
-router.post('/:cid/product/:pid', (req, res) => {
-const cart = carts.find(c => c.id === parseInt(req.params.cid));
-if (!cart) return res.status(404).send('Carrito no encontrado');
-
-const pid = parseInt(req.params.pid);
-const existingProduct = cart.products.find(p => p.product === pid);
-
-if (existingProduct) {
-    existingProduct.quantity++;
-} else {
-    cart.products.push({ product: pid, quantity: 1 });
-}
-
-res.json(cart);
+router.post('/:cid/product/:pid', async (req, res) => {
+const updatedCart = await manager.addProductToCart(req.params.cid, req.params.pid);
+if (!updatedCart) return res.status(404).send('Carrito no encontrado');
+res.json(updatedCart);
 });
 
 module.exports = router;
