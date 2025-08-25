@@ -3,25 +3,25 @@ const router = express.Router();
 const path = require('path');
 const CartManager = require('../managers/CartManager');
 
-const manager = new CartManager(path.join(__dirname, '../Data/cart.json'));
+
 
 router.get('/', async (req, res) => {
-const carts = await manager.getCarts();
+const carts = await cartManager.getCarts();
 res.json(carts);
 });
 
 router.get('/:cid', async (req, res) => {
-const cart = await manager.getCartById(req.params.cid);
+const cart = await cartManager.getCartById(req.params.cid);
 cart ? res.json(cart) : res.status(404).send('Carrito no encontrado');
 });
 
 router.post('/', async (req, res) => {
-const newCart = await manager.createCart();
+const newCart = await cartManager.createCart();
 res.status(201).json(newCart);
 });
 
 router.post('/:cid/product/:pid', async (req, res) => {
-const updatedCart = await manager.addProductToCart(req.params.cid, req.params.pid);
+const updatedCart = await cartManager.addProductToCart(req.params.cid, req.params.pid);
 if (!updatedCart) return res.status(404).send('Carrito no encontrado');
 res.json(updatedCart);
 });

@@ -3,7 +3,7 @@ const router = express.Router();
 const path = require('path');
 const ProductManager = require('../managers/ProductManager')
 
-const manager = new ProductManager(path.join(__dirname, '../Data/products.json'));
+const manager = new ProductManager(path.join(__dirname, '../models/products.json'));
 
 router.get('/', async (req, res) => {
 const products = await manager.getProducts();

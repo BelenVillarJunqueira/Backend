@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Productos en tiempo real</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .product, .cart-item { border: 1px solid #ee942d; padding: 10px; margin: 10px 0; }
+        .product button, .cart-item button { margin-left: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Productos</h1>
+    <div id="products">
+        {{#each products}}
+        <div class="product">
+            <strong>{{this.title}}</strong> - ${{this.price}}<br>
+            <em>{{this.description}}</em><br>
+            <button class="add-to-cart" data-id="{{this.id}}">Agregar al carrito</button>
+            <button class="delete-product" data-id="{{this.id}}">Eliminar producto</button>
+        </div>
+        {{/each}}
+    </div>
+
+    <h2>Carrito</h2>
+    <div id="cart">
+        {{#if cart.products.length}}
+            {{#each cart.products}}
+            <div class="cart-item">
+                <strong>{{this.product}}</strong> - Cantidad: {{this.quantity}}
+                <button class="remove-from-cart" data-id="{{this.product}}">Quitar</button>
+            </div>
+            {{/each}}
+        {{else}}
+            <p>El carrito está vacío.</p>
+        {{/if}}
+    </div>
+
+    <script>
+        const socket = io();
+
+
+        document.querySelectorAll('.add-to-cart').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const productId = btn.dataset.id;
+                socket.emit('addProductToCart', { productId });
+            });
+        });
+
+
+        document.querySelectorAll('.remove-from-cart').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const productId = btn.dataset.id;
+                socket.emit('removeProductFromCart', { productId });
+            });
+        });
+
+
+        document.querySelectorAll('.delete-product').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const productId = btn.dataset.id;
+                socket.emit('deleteProduct', { productId });
+            });
+        });
+
+
+        socket.on('updateCart', (cart) => {
+            console.log('Carrito actualizado:', cart);
+            location.reload(); 
+        });
+
+
+        socket.on('updateProducts', (products) => {
+            console.log('Productos actualizados:', products);
+            location.reload(); /
+        });
+    </script>
+</body>
+</html>
