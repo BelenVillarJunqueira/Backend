@@ -1,0 +1,109 @@
+<h1>El Viejo Manzano 🍎</h1>
+
+    <div class="contenedor d-flex flex-column justify-content-center align-items-center text-center">
+        <div class="texto">
+            <h2>🌸Plantas como elemento de bienestar:</h2>
+        <em> <p>Descubre la belleza de las plantas de interior en nuestra tienda online. Creá un ambiente
+                acogedor y único para tu espacio.</p></em>
+        </div>
+    </div>
+    
+    
+    
+
+<h2>🛒 Carrito</h2>
+
+<div id="cart">
+<p>Carrito vacío</p>
+<button onclick="clearCart()">Vaciar carrito</button>
+</div>
+
+<hr>
+
+<h2>📦 Productos disponibles</h2>
+
+<div class="grid">
+{{#each products}}
+    <div class="card">
+    <img src="{{this.image}}" alt="" width="100%" style="border-radius: 6px;"/>
+    <h3>{{this.title}}</h3>
+    <p><strong>${{this.price}}</strong></p>
+    <p>{{this.description}}</p>
+    <p><small>ID: {{this._id}}</small></p>
+    <p><small>Cantidad:50 {{this.quantity}}</small></p>
+    
+    <button onclick="addToCart('{{this._id}}', '{{this.title}}', {{this.price}})">
+        🛒 Agregar al carrito
+    </button>
+    </div>
+{{/each}}
+</div>
+
+<div class="pagination">
+{{#if hasPrevPage}}
+    <a href="{{prevLink}}">⬅️ Página anterior</a>
+{{/if}}
+<span>Página {{page}} 1 {{totalPages}}</span>
+{{#if hasNextPage}}
+    <a href="{{nextLink}}">Página siguiente ➡️</a>
+{{/if}}
+</div>
+
+
+<script>
+    
+let cart = [];
+
+function addToCart(id, title, price, description) {
+
+let existing = cart.find(p => p.id === id);
+if (existing) {
+    existing.quantity++;
+} else {
+    cart.push({ id, title, price, description, quantity: 1 });
+}
+renderCart();
+}
+
+function clearCart() {
+    cart = [];
+    renderCart();
+}
+
+function renderCart() {
+if (cart.length === 0) {
+    document.getElementById("cart").innerHTML =
+    "<p>Carrito vacío</p><button onclick='clearCart()'>Vaciar carrito</button>";
+} else {
+    let items = cart.map(
+    (p, index) => `
+        <li>
+        <strong>${p.title}</strong>  
+        (ID: ${p.id})  
+        Cantidad: ${p.quantity || 1}  
+        - $${p.price || 0}  
+        <button onclick="removeFromCart(${index})">❌ Eliminar</button>
+        </li>
+    `
+    ).join("");
+
+
+    let total = cart.reduce((acc, p) => acc + (p.price || 0) * (p.quantity || 1), 0);
+
+    document.getElementById("cart").innerHTML =
+    "<ul>" + items + "</ul>" +
+    `<p><strong>Total: $${total}</strong></p>` +
+    "<button onclick='clearCart()'>Vaciar carrito</button>";
+}
+}
+
+
+function removeFromCart(index) {
+cart.splice(index, 1); 
+renderCart();
+}
+</script>
+
+
+
+

@@ -1,33 +1,43 @@
-const express = require('express');
+const express = require("express");
+const multer = require("multer");
 const router = express.Router();
-const path = require('path');
-const ProductManager = require('../managers/ProductManager')
+const Product = require("../models/productsModels");
 
-const manager = new ProductManager(path.join(__dirname, '../models/products.json'));
 
-router.get('/', async (req, res) => {
-const products = await manager.getProducts();
-res.json(products);
-});
+router.get("/", async (req, res) => {
+try {
+    const { limit = 10, page = 1, sort, query } = req.query;
 
-router.get('/:pid', async (req, res) => {
-const product = await manager.getProductById(req.params.pid);
-product ? res.json(product) : res.status(404).send('Producto no encontrado');
-});
+    const filter = query ? { category: query } : {};
 
-router.post('/', async (req, res) => {
-const newProduct = await manager.addProduct(req.body);
-res.status(201).json(newProduct);
-});
+    const options = {
+    limit: parseInt(limit),
+    page: parseInt(page),
+    sort: sort ? { price: sort === "asc" ? 1 : -1 } : {},
+    lean: true,
+    };
 
-router.put('/:pid', async (req, res) => {
-const updated = await manager.updateProduct(req.params.pid, req.body);
-updated ? res.json(updated) : res.status(404).send('Producto no encontrado');
-});
+    const result = await Product.paginate(filter, options);
 
-router.delete('/:pid', async (req, res) => {
-const success = await manager.deleteProduct(req.params.pid);
-success ? res.sendStatus(204) : res.status(404).send('Producto no encontrado');
+    res.json({
+    status: "success",
+    payload: result.docs,
+    totalPages: result.totalPages,
+    prevPage: result.prevPage,
+    nextPage: result.nextPage,
+    page: result.page,
+    hasPrevPage: result.hasPrevPage,
+    hasNextPage: result.hasNextPage,
+    prevLink: result.hasPrevPage
+        ? `/api/products?page=${result.prevPage}`
+        : null,
+    nextLink: result.hasNextPage
+        ? `/api/products?page=${result.nextPage}`
+        : null,
+    });
+} catch (error) {
+    res.status(500).json({ status: "error", error: error.message });
+}
 });
 
 module.exports = router;

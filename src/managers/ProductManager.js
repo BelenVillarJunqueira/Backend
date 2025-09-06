@@ -1,4 +1,5 @@
 const fs = require("fs").promises;
+
 const { v4: uuidv4 } = require("uuid");
 
 
@@ -7,48 +8,38 @@ class ProductManager {
         this.path = path; 
     }
 
-    async getProducts() {
+async getProducts() {
         try {
-            const data = await fs.readFile(this.path, "utf-8");
-            const products = JSON.parse(data);
-            return Array.isArray(products) ? products : [];
+            if (fs.existsSync(this.path)) {
+                const data = await fs.promises.readFile(this.path, "utf-8");
+                return JSON.parse(data);
+            } else {
+                return [];
+            }
         } catch (error) {
-            await fs.writeFile(this.path, JSON.stringify([], null, 2));
+            console.error("Error al leer productos:", error);
             return [];
         }
     }
 
-    async getProductById(id) {
-        const products = await this.getProducts();
-        return products.find(p => p.id === id);
-    }
-
-
     async addProduct(product) {
+
+        if (!product.title || !product.price || !product.stock) {
+            throw new Error("Faltan campos obligatorios: title, price, stock");
+        }
+        if (typeof product.price !== "number" || product.price <= 0) {
+            throw new Error("El precio debe ser un número mayor que 0");
+        }
+        if (!Number.isInteger(product.stock) || product.stock < 0) {
+            throw new Error("El stock debe ser un número entero positivo");
+        }
+
         const products = await this.getProducts();
-        const newProduct = { id: uuidv4(), ...product };
-        products.push(newProduct);
-        await fs.writeFile(this.path, JSON.stringify(products, null, 2));
-        return newProduct;
-    }
+        product.id = products.length ? products[products.length - 1].id + 1 : 1;
+        products.push(product);
 
-
-    async updateProduct(id, data) {
-        const products = await this.getProducts();
-        const index = products.findIndex(p => p.id === id);
-        if (index === -1) return null;
-
-        products[index] = { ...products[index], ...data, id };
-        await fs.writeFile(this.path, JSON.stringify(products, null, 2));
-        return products[index];
-    }
-
-    async deleteProduct(id) {
-        const products = await this.getProducts();
-        const filtered = products.filter(p => p.id !== id);
-        if (filtered.length === products.length) return null; 
-        await fs.writeFile(this.path, JSON.stringify(filtered, null, 2));
-        return true;
+        await fs.promises.writeFile(this.path, JSON.stringify(products, null, 2));
+        return product;
     }
 }
 

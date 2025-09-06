@@ -1,31 +1,41 @@
-const { Router } = require("express");
-const ProductManager = require("../managers/ProductManager");
-const CartManager = require("../managers/CartManager");
+const express = require("express");
+const Product = require("../models/productsModels");
 
-const router = Router();
+const router = express.Router();
 
-const productManager = new ProductManager("src/models/products.json");
-const cartManager = new CartManager("src/models/cart.json");
+router.get("/products", async (req, res) => {
+try {
+    const { limit = 10, page = 1, sort, query } = req.query;
 
+    const filter = query ? { category: query } : {};
 
+    const options = {
+    limit: parseInt(limit),
+    page: parseInt(page),
+    sort: sort ? { price: sort === "asc" ? 1 : -1 } : {},
+    lean: true,
+    };
 
-router.get('/', async (req, res) => {
-    const products = await productManager.getProducts();
-    const cart = await cartManager.getCartById('cart001'); 
-    res.render('home', { products, cart });
-});
+    const result = await Product.paginate(filter, options);
 
-
-
-router.get("/realtimeproducts", async (req, res) => {
-    const products = await productManager.getProducts();
-    res.render("realTimeProducts", { products });
-});
-
-
-router.get("/realtimecarts", async (req, res) => {
-    const carts = await cartManager.getCarts();
-    res.render("realTimeCarts", { carts });
+    res.render("home", {
+    products: result.docs,
+    totalPages: result.totalPages,
+    prevPage: result.prevPage,
+    nextPage: result.nextPage,
+    page: result.page,
+    hasPrevPage: result.hasPrevPage,
+    hasNextPage: result.hasNextPage,
+    prevLink: result.hasPrevPage
+        ? `/products?page=${result.prevPage}`
+        : null,
+    nextLink: result.hasNextPage
+        ? `/products?page=${result.nextPage}`
+        : null,
+    });
+} catch (error) {
+    res.status(500).send("Error al cargar productos");
+}
 });
 
 module.exports = router;

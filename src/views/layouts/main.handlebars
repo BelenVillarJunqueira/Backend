@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<title>El Viejo Manzano</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+    body { font-family: system-ui, Arial; margin: 1.5rem; }
+    header a { margin-right: 1rem; }
+    .card { border: 1px solid #faa039; border-radius: 10px; padding: 12px; margin: 8px 0; }
+    .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+    form.inline { display: inline; }
+    nav.pagination a { margin: 0 6px; }
+    .product-img {width: 200px; height: 200px; object-fit: cover; border-radius: 8px; display: block; margin: 0 auto;}
+</style>
+</head>
+<body>
+<header>
+    {{#if cartId}}<a href="/carts/{{cartId}}">Ver carrito</a>{{/if}}
+</header>
+<hr/>
+{{{body}}}
+</body>
+</html>
