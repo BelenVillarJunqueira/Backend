@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Cart = require("../models/cart.model");
+const Product = require("../models/productsModels"); 
 
 
 router.post("/", async (req, res) => {
@@ -19,49 +20,65 @@ try {
     const { cid } = req.params;
     const cart = await Cart.findById(cid).populate("products.product");
 
-    if (req.headers.accept?.includes("application/json")) {
-    return res.json(cart);
-    }
+    if (!cart) return res.status(404).json({ error: "Carrito no encontrado" });
 
-    res.render("cart", { 
-    cart: cart.products.map(p => ({
-        _id: p.product._id,
-        title: p.product.title,
-        description: p.product.description,
-        price: p.product.price,
-        quantity: p.quantity,
-         subtotal: p.product.price * p.quantity
-    }))
-    });
+    const productosConSubtotal = cart.products.map(p => ({
+    _id: p.product._id,
+    title: p.product.title,
+    description: p.product.description,
+    price: p.product.price,
+    quantity: p.quantity,
+      subtotal: p.product.price * p.quantity
+    }));
 
-    total: cart.products.reduce((acc, p) => acc + p.product.price * p.quantity, 0)
+    const total = cart.products.reduce(
+      (acc, p) => acc + p.product.price * p.quantity,
+    0
+    );
 
-    
+    res.json({ products: productosConSubtotal, total });
 } catch (error) {
     res.status(500).send("Error al obtener el carrito");
 }
 });
 
 
-router.post("/:cid/product/:pid", async (req, res) => { 
-    try {
-    const cart = await Cart.findById(req.params.cid);
+router.post("/:cid/products/:pid", async (req, res) => {
+try {
+    console.log("📩 Body recibido:", req.body); 
+
+    const { cid, pid } = req.params;
+    let { quantity } = req.body;
+
+    if (!quantity || quantity <= 0) {
+    return res.status(400).json({ error: "La cantidad debe ser mayor a 0" });
+    }
+
+
+    const productExists = await Product.findById(pid);
+    if (!productExists) {
+    return res.status(404).json({ error: "Producto no encontrado en la tienda" });
+    }
+
+    const cart = await Cart.findById(cid);
     if (!cart) return res.status(404).json({ error: "Carrito no encontrado" });
 
-    const existingProduct = cart.products.find(p => p.product.toString() === req.params.pid);
+    const existingProduct = cart.products.find(p => p.product.toString() === pid);
 
     if (existingProduct) {
-    existingProduct.quantity += 1;
+    existingProduct.quantity += quantity;
     } else {
-    cart.products.push({ product: req.params.pid, quantity: 1 });
+    cart.products.push({ product: pid, quantity });
     }
 
     await cart.save();
     res.json(cart);
 } catch (error) {
+    console.error("❌ Error en POST /:cid/products/:pid:", error);
     res.status(500).json({ error: "Error al agregar producto al carrito" });
 }
 });
+
 
 router.delete("/:cid/products/:pid", async (req, res) => {
 try {
@@ -136,8 +153,5 @@ try {
     res.status(500).json({ error: "Error al vaciar carrito" });
 }
 });
-
-
-
 
 module.exports = router;

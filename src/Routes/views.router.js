@@ -1,20 +1,32 @@
 const express = require("express");
-const Product = require("../models/productsModels");
-
 const router = express.Router();
+const Product = require("../models/productsModels");
 
 router.get("/products", async (req, res) => {
 try {
-    const { limit = 10, page = 1, sort, query } = req.query;
+    let { limit = 10, page = 1, sort, query } = req.query;
+    limit = parseInt(limit) || 10;
+    page = parseInt(page) || 1;
 
-    const filter = query ? { category: query } : {};
+    const filter = {};
+    if (query) {
+    if (query.includes(":")) {
+        const [k, v] = query.split(":");
+        if (k === "available") {
+        filter.stock = v === "true" ? { $gt: 0 } : 0;
+        } else {
+        filter[k] = isNaN(v) ? v : Number(v);
+        }
+    } else {
+        filter.$or = [
+        { title: { $regex: query, $options: "i" } },
+        { description: { $regex: query, $options: "i" } }
+        ];
+    }
+    }
 
-    const options = {
-    limit: parseInt(limit),
-    page: parseInt(page),
-    sort: sort ? { price: sort === "asc" ? 1 : -1 } : {},
-    lean: true,
-    };
+    const options = { page, limit, lean: true };
+    if (sort) options.sort = { price: sort === "asc" ? 1 : -1 };
 
     const result = await Product.paginate(filter, options);
 
@@ -26,14 +38,11 @@ try {
     page: result.page,
     hasPrevPage: result.hasPrevPage,
     hasNextPage: result.hasNextPage,
-    prevLink: result.hasPrevPage
-        ? `/products?page=${result.prevPage}`
-        : null,
-    nextLink: result.hasNextPage
-        ? `/products?page=${result.nextPage}`
-        : null,
+    prevLink: result.hasPrevPage ? `/products?page=${result.prevPage}&limit=${limit}` : null,
+    nextLink: result.hasNextPage ? `/products?page=${result.nextPage}&limit=${limit}` : null
     });
 } catch (error) {
+    console.error("Error en views /products:", error);
     res.status(500).send("Error al cargar productos");
 }
 });
